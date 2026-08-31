@@ -1,5 +1,7 @@
 # Master Library - Ingestion & Publication Pipeline
 
+As part of an ongoing effort to make recordings of teachings available to a wide audience, we share the source code of the digital Master Library platform that is in the making. We do so with the intention of supporting similar initatives such that they can readily deploy their own digital library. The work is licensed under the terms specified in the LICENSE file of each repository.
+
 > **Cloudflare Python Worker for Video Ingestion and Stream Processing**
 
 A production-ready Python 3.13 Cloudflare Worker that automates the ingestion of R2-backed videos into Cloudflare Stream, with status synchronization to Airtable and downstream handoff capabilities.
