@@ -1,5 +1,6 @@
 import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
+import { catalogVideos, listCatalogVideos, searchCatalogVideos, type VideoRecord } from '../src/catalog'
 import worker from '../src/index'
 
 const runtimeEnv = {
@@ -24,6 +25,29 @@ describe('master-library catalog worker', () => {
 			status: 'ok',
 			service: 'master-library-catalog',
 		})
+	})
+
+	it('returns only public published catalog results by default', () => {
+		const hiddenVideo: VideoRecord = {
+			id: 'hidden-001',
+			title: 'Compassion in Private Practice',
+			description: 'Private draft material that should never appear in the public catalog.',
+			teacher: 'Hidden Teacher',
+			topic: 'Compassion',
+			status: 'published',
+			visibility: 'private',
+			language: 'en',
+			stream_uid: 'hidden-stream',
+			duration_seconds: 900,
+			updated_at: '2026-09-20T00:00:00.000Z',
+		}
+
+		const videos = [...catalogVideos, hiddenVideo]
+		const listResult = listCatalogVideos(videos)
+		const searchResult = searchCatalogVideos(videos, 'compassion', 10)
+
+		expect(listResult.some((video) => video.id === hiddenVideo.id)).toBe(false)
+		expect(searchResult.some((video) => video.id === hiddenVideo.id)).toBe(false)
 	})
 
 	it('returns matching videos from the search endpoint', async () => {
