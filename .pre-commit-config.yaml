@@ -21,7 +21,7 @@ repos:
         files: ^workers/catalog/pnpm-lock\.yaml$
         args: [--allow-multiple-documents]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.0
+    rev: v0.16.8
     hooks:
       - id: ruff
         args: [--fix]

@@ -33,7 +33,7 @@
       "url": "https://builds.mcp.cloudflare.com/mcp"
     },
     "cloudflare-observability": {
-      "type": "http",,
+      "type": "http",
       "url": "https://observability.mcp.cloudflare.com/mcp"
     }
   }
