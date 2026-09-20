@@ -1,0 +1,28 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "master-library-catalog",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-11-11",
+	"observability": {
+		"enabled": true,
+	},
+	"assets": {
+		"directory": "./public/",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application",
+		"run_worker_first": ["/api/*"]
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "master-library-catalog",
+			"database_id": "00000000-0000-0000-0000-000000000000"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "CATALOG_STORAGE",
+			"bucket_name": "master-library-catalog"
+		}
+	]
+}

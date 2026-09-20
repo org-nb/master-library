@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Master Library Catalog</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <p class="eyebrow">Catalog</p>
+        <h1>Master Library</h1>
+      </header>
+
+      <section class="panel">
+        <div class="status-row">
+          <strong>Worker status</strong>
+          <span id="health">checking…</span>
+        </div>
+
+        <label class="search-box" for="query">
+          <span>Search videos</span>
+          <input id="query" type="search" placeholder="Search by title, teacher, or topic" />
+        </label>
+      </section>
+
+      <section>
+        <h2>Featured videos</h2>
+        <ul id="videos" class="video-list"></ul>
+      </section>
+    </main>
+
+    <script src="/script.js"></script>
+  </body>
+</html>
