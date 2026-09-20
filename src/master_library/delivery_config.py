@@ -49,7 +49,7 @@ class DeliveryConfig(BaseModel):
         return value
 
     @model_validator(mode="after")
-    def environment_must_match_resource_names(self) -> "DeliveryConfig":
+    def environment_must_match_resource_names(self) -> DeliveryConfig:
         env = self.environment
         resource_tokens = {
             "worker_name": self.worker_name,
@@ -77,12 +77,12 @@ class DeliveryConfig(BaseModel):
         return self
 
     @classmethod
-    def from_json(cls, payload: str) -> "DeliveryConfig":
+    def from_json(cls, payload: str) -> DeliveryConfig:
         """Parse a JSON string into a validated delivery config."""
         return cls.model_validate_json(payload)
 
     @classmethod
-    def from_file(cls, path: str | Path) -> "DeliveryConfig":
+    def from_file(cls, path: str | Path) -> DeliveryConfig:
         """Load a delivery config from a JSON file path."""
         config_path = Path(path)
         return cls.model_validate(json.loads(config_path.read_text(encoding="utf-8")))
