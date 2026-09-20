@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor pl as Project Lead
+    participant vajra@{ "type" : "database" } as Vajra Echoes
+    actor dpr as DPR
+    actor ml as Master Librarian
+    actor ve as Video Editor
+    box Annotators
+        actor ann1 as Lead Annotator
+        actor ann2 as Other Annotators
+    end
+    pl <<->> vajra: Selects teachings
+    pl ->>+dpr: Proposes selection for editing
+    dpr -->>-pl: Provides guidance and approval
+    pl ->> ml: Provides raw footage for editing
+    alt direct briefing
+        ml ->> ve: Briefs
+    else via lead annotator
+        ml ->> +ann1: Briefs
+        note right of ann1: reads transcript,<br>watches recordings
+        ann1 ->> -ve: Briefs
+    end
+    loop Editing and reviewing
+        activate ve
+        ve ->> +ann1: Provides updated version of edited videos
+        ann1 -->> -ve: Provides feedback/review notes
+    end
+    par Annotation
+        ann1 ->> ann2: ...
+    end

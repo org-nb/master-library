@@ -1,0 +1,87 @@
+%% DPR Recorded Teachings / Nalanda Digital Dharma — COMPLETE flow (with optional steps)
+%% For true BPMN swimlanes in Mermaid v11.16.0+ (e.g. the mermaid.ai editor),
+%% change "flowchart LR" below to "swimlane-beta LR". Everything else stays the same.
+%% Prefer a taller, narrower picture? Swap "LR" for "TB".  Dotted lines = optional.
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Trebuchet MS, Verdana, sans-serif","fontSize":"14px","primaryColor":"#fdf8f1","primaryTextColor":"#233039","primaryBorderColor":"#c68a5b","lineColor":"#8a7f72","secondaryColor":"#f4eee2","tertiaryColor":"#fbf7f0","clusterBkg":"#f5efe4","clusterBorder":"#dcc7a8","titleColor":"#233039","edgeLabelBackground":"#fdf8f1"}}}%%
+swimlane-beta LR
+  accTitle: DPR Recorded Teachings — complete flow
+  accDescr: The full process, by responsibility, from a long-list of teachings through optional pre-edit instructions, editing, review, annotation, storage, translation, copy and content, and publishing.
+
+  subgraph dpr["Dzogchen Ponlop Rinpoche"]
+    dprA["Give guidance<br/>and approval"]
+  end
+
+  subgraph lead["Project Lead"]
+    intake(["A long-list of teachings<br/>from Vajra Echoes is created"])
+    pl1["Propose three collections<br/>as priority for editing"]
+    pl2["Connect with<br/>the Master Librarian"]
+    pl3["Receive it back and initiate<br/>copy and content drafting"]
+    ded(["Dedicate the merit<br/>and give thanks"])
+  end
+
+  subgraph master["Master Librarian"]
+    ml1["Initiate library work:<br/>brief the editor and<br/>invite the group of three"]
+    ml2["Confirm completion and<br/>hand back to the Project Lead"]
+    ml3["Store video and metadata in the<br/>Master Library: Airtable, Cloudflare, Meilisearch"]
+  end
+
+  subgraph editor["Editor (Carlos)"]
+    ed1["Edit into three lengths:<br/>full talks, mid-length, shorts"]
+    ed2["Finalize from<br/>the review notes"]
+  end
+
+  subgraph reviewer["Reviewer (one of the three annotators)"]
+    rv0["Optional: read the transcript;<br/>full talks available to watch;<br/>instructions for the editor"]
+    rv1["Review the first edit:<br/>audio, video, cuts"]
+    rv2["Receive the final edit; bring it<br/>and own notes to the group"]
+  end
+
+  subgraph group["Annotation Group (3 Karunikas)"]
+    an2["Watch the mid-length and shorts<br/>from the final edits; full-talk<br/>transcripts available; keep personal<br/>notes guided by the form's questions"]
+    an3["Meet: a contemplative<br/>conversation"]
+    an4["Fill one form per<br/>video and submit"]
+    anOpt["Optional: a member later hosts<br/>a live conversation on a<br/>published video"]
+  end
+
+  subgraph trans["Translators"]
+    tr1["Add caption translations to the<br/>mid-length and shorts (in Cloudflare)"]
+  end
+
+  subgraph pubh["Content and Publishing"]
+    cp1["Draft copy<br/>and content"]
+    pub1["Publish mid-length and shorts:<br/>public library and social"]
+    pub2["Full talks: master library first,<br/>later public or member groups"]
+    pub(["Published and searchable"])
+  end
+
+  intake --> pl1
+  pl1 -->|prioritised list| dprA
+  dprA -->|back to the Project Lead| pl2
+  pl2 -->|handoff| ml1
+  ml1 -->|brief| ed1
+  ml1 -.->|optional brief via the reviewer| rv0
+  rv0 -.->|instructions| ed1
+  ed1 -->|first edit| rv1
+  rv1 -->|review notes| ed2
+  ed2 -->|final edit| rv2
+  rv2 -->|convene the group| an2
+  an2 --> an3
+  an3 --> an4
+  an4 -->|forms submitted| ml2
+  ml2 -->|hand back| pl3
+  ml2 -->|store| ml3
+  pl3 -->|initiate| cp1
+  ml3 -.->|golden lines, timestamps, questions| cp1
+  ml3 -->|videos stored| tr1
+  ml3 -->|video ready, English first| pub1
+  ml3 --> pub2
+  tr1 -.->|await captions, or add languages later| pub1
+  tr1 -.->|optional for full talks| pub2
+  cp1 -->|copy ready| pub1
+  pub1 --> pub
+  pub2 --> pub
+  pub -->|for the benefit of all| ded
+  pub -.->|later, optional| anOpt
+
+  classDef se fill:#eab883,stroke:#b06a34,color:#2a1c10,font-weight:bold;
+  class intake,pub,ded se;
