@@ -1,0 +1,8 @@
+{
+  "environment": "dev",
+  "account_id": "cf-account-dev-123",
+  "worker_name": "master-library-catalog-dev",
+  "d1_database_name": "master-library-catalog-dev",
+  "r2_bucket_name": "master-library-catalog-dev",
+  "queue_name": "catalog-reconcile-dev"
+}

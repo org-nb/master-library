@@ -1,0 +1,8 @@
+{
+  "environment": "prod",
+  "account_id": "REPLACE_WITH_PROD_ACCOUNT_ID",
+  "worker_name": "master-library-catalog-prod",
+  "d1_database_name": "master-library-catalog-prod",
+  "r2_bucket_name": "master-library-catalog-prod",
+  "queue_name": "catalog-reconcile-prod"
+}

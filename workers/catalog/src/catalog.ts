@@ -72,6 +72,7 @@ export const catalogVideos: VideoRecord[] = [
 
 export type CatalogFilter = {
 	limit?: number
+	offset?: number
 	status?: string
 	visibility?: string
 }
@@ -80,22 +81,28 @@ export function listCatalogVideos(
 	videos: VideoRecord[] = catalogVideos,
 	filter: CatalogFilter = {},
 ): VideoRecord[] {
-	const limit = Math.max(1, Math.min(filter.limit ?? 20, 100))
-	let results = [...videos]
+	const offset = Math.max(0, Number(filter.offset ?? 0))
+	const limit = Math.max(0, Math.min(Number(filter.limit ?? 20), 100))
+	let results = videos.filter((video) => video.status === 'published' && video.visibility === 'public')
 
-	if (filter.status) {
+	if (filter.status && filter.status !== 'all') {
 		results = results.filter((video) => video.status === filter.status)
 	}
 
-	if (filter.visibility) {
+	if (filter.visibility && filter.visibility !== 'all') {
 		results = results.filter((video) => video.visibility === filter.visibility)
 	}
 
-	return results.slice(0, limit)
+	if (limit === 0) {
+		return []
+	}
+
+	return results.slice(offset, offset + limit)
 }
 
 export function findCatalogVideo(videos: VideoRecord[] = catalogVideos, id: string): VideoRecord | undefined {
-	return videos.find((video) => video.id === id)
+	const allVideos = videos.filter((video) => video.status === 'published' && video.visibility === 'public')
+	return allVideos.find((video) => video.id === id)
 }
 
 export function searchCatalogVideos(
@@ -109,6 +116,9 @@ export function searchCatalogVideos(
 	}
 
 	const matches = videos.filter((video) => {
+		if (video.status !== 'published' || video.visibility !== 'public') {
+			return false
+		}
 		const haystack = [video.title, video.description, video.teacher, video.topic]
 			.join(' ')
 			.toLowerCase()

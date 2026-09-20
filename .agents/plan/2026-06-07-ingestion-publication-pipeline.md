@@ -247,7 +247,9 @@ def normalize_video_record(record: dict) -> VideoRecord:
 
     assets = fields.get("Assets", [])
     primary_assets = [
-        asset for asset in assets if asset.get("isPrimary") and asset.get("type") == "source_video"
+        asset
+        for asset in assets
+        if asset.get("isPrimary") and asset.get("type") == "source_video"
     ]
     if len(primary_assets) != 1:
         raise ValueError("Video must have exactly one primary source asset")
@@ -527,7 +529,9 @@ from src.webhook_handler import handle_webhook_payload
 
 
 def test_handle_webhook_payload_marks_ready_to_stream():
-    assert handle_webhook_payload({"readyToStream": True}) == {"next_status": "ready_to_stream"}
+    assert handle_webhook_payload({"readyToStream": True}) == {
+        "next_status": "ready_to_stream"
+    }
 
 
 def test_reconcile_state_marks_error_for_failed_stream():
