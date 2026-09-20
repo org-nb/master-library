@@ -31,3 +31,17 @@ def test_delivery_config_accepts_real_environment_values() -> None:
 
     assert config.environment == "prod"
     assert config.account_id == "cf-account-prod-123"
+
+
+def test_delivery_config_rejects_mismatched_environment_names() -> None:
+    with pytest.raises(ValueError, match="environment"):
+        DeliveryConfig.model_validate(
+            {
+                "environment": "prod",
+                "account_id": "cf-account-dev-123",
+                "worker_name": "master-library-catalog-dev",
+                "d1_database_name": "master-library-catalog-dev",
+                "r2_bucket_name": "master-library-catalog-dev",
+                "queue_name": "catalog-reconcile-dev",
+            }
+        )

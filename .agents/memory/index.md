@@ -4,6 +4,7 @@ Freeform session notes and handover scratch. One row per doc, newest first. New 
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
+| 2026-09-20 | [202609201521_upload-browse-catalog-story.md](202609201521_upload-browse-catalog-story.md) | Drafted the upload-and-browse story (Stream UI first cut) with drafted issue body; issue creation blocked on disabled GitHub issues. |
 | 2026-09-20 | [202609200957_catalog-design-stack-prep.md](202609200957_catalog-design-stack-prep.md) | Prepared the `catalog/design` layer and kept the implementation-note handoff out of the documentation-only commit. |
 | 2026-09-20 | [202609200936_adr-0001-catalog-plan.md](202609200936_adr-0001-catalog-plan.md) | Published the ADR-0001 catalog implementation plan with distinct local and live qualification gates. |
 | 2026-09-20 | [202609200921_adr-0002-delivery-plan.md](202609200921_adr-0002-delivery-plan.md) | Published the ADR-0002 delivery implementation plan; execution remains blocked on the catalog Worker. |

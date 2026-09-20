@@ -72,6 +72,7 @@ export const catalogVideos: VideoRecord[] = [
 
 export type CatalogFilter = {
 	limit?: number
+	offset?: number
 	status?: string
 	visibility?: string
 }
@@ -80,18 +81,23 @@ export function listCatalogVideos(
 	videos: VideoRecord[] = catalogVideos,
 	filter: CatalogFilter = {},
 ): VideoRecord[] {
-	const limit = Math.max(1, Math.min(filter.limit ?? 20, 100))
+	const offset = Math.max(0, Number(filter.offset ?? 0))
+	const limit = Math.max(0, Math.min(Number(filter.limit ?? 20), 100))
 	let results = videos.filter((video) => video.status === 'published' && video.visibility === 'public')
 
-	if (filter.status) {
+	if (filter.status && filter.status !== 'all') {
 		results = results.filter((video) => video.status === filter.status)
 	}
 
-	if (filter.visibility) {
+	if (filter.visibility && filter.visibility !== 'all') {
 		results = results.filter((video) => video.visibility === filter.visibility)
 	}
 
-	return results.slice(0, limit)
+	if (limit === 0) {
+		return []
+	}
+
+	return results.slice(offset, offset + limit)
 }
 
 export function findCatalogVideo(videos: VideoRecord[] = catalogVideos, id: string): VideoRecord | undefined {

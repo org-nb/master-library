@@ -7,11 +7,13 @@
 
 import { Hono } from 'hono'
 import {
+	catalogVideos,
 	findCatalogVideo,
 	listCatalogVideos,
 	type VideoRecord,
 	searchCatalogVideos,
 } from './catalog'
+import { summarizeCatalogVideos } from './pipeline'
 
 type Bindings = {
 	ASSETS: Fetcher
@@ -21,28 +23,32 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-async function getVideoRows(env: Bindings): Promise<VideoRecord[]> {
+async function getCatalogInventory(env: Bindings): Promise<VideoRecord[]> {
 	if (!env.DB) {
-		return listCatalogVideos()
+		return [...catalogVideos]
 	}
 
 	try {
 		const { results } = await env.DB.prepare(
 			`SELECT id, title, description, teacher, topic, status, visibility, language, stream_uid, duration_seconds, updated_at
 			 FROM videos
-			 WHERE visibility = 'public'
 			 ORDER BY updated_at DESC
-			 LIMIT 20`,
+			 LIMIT 100`,
 		).all()
 
 		if (results.length === 0) {
-			return listCatalogVideos()
+			return [...catalogVideos]
 		}
 
 		return results as VideoRecord[]
 	} catch {
-		return listCatalogVideos()
+		return [...catalogVideos]
 	}
+}
+
+async function getVideoRows(env: Bindings): Promise<VideoRecord[]> {
+	const inventory = await getCatalogInventory(env)
+	return inventory.filter((video) => video.status === 'published' && video.visibility === 'public')
 }
 
 async function searchVideoRows(env: Bindings, query: string, limit: number): Promise<VideoRecord[]> {
@@ -81,13 +87,15 @@ app.get('/api/health', (c) => {
 
 app.get('/api/videos', async (c) => {
 	const limit = Math.max(1, Math.min(Number.parseInt(c.req.query('limit') ?? '20', 10) || 20, 100))
+	const offset = Math.max(0, Number.parseInt(c.req.query('offset') ?? '0', 10) || 0)
 	const visibility = c.req.query('visibility') ?? undefined
 	const status = c.req.query('status') ?? undefined
 	const rows = await getVideoRows(c.env)
-	const filtered = listCatalogVideos(rows, { limit, status, visibility })
+	const filtered = listCatalogVideos(rows, { limit, offset, status, visibility })
 
 	return c.json({
 		count: filtered.length,
+		offset,
 		items: filtered,
 	})
 })
@@ -116,8 +124,29 @@ app.get('/api/search', async (c) => {
 	})
 })
 
+app.get('/api/sync-summary', async (c) => {
+	const rows = await getCatalogInventory(c.env)
+	return c.json(summarizeCatalogVideos(rows))
+})
+
 app.all('*', (c) => {
 	return c.env.ASSETS.fetch(c.req.raw)
 })
 
-export default app
+const scheduledHandler = async (
+	_event: ScheduledEvent,
+	env: Bindings,
+): Promise<Response> => {
+	const rows = await getCatalogInventory(env)
+	const summary = summarizeCatalogVideos(rows)
+	return new Response(JSON.stringify(summary), {
+		headers: {
+			'content-type': 'application/json',
+		},
+	})
+}
+
+export default {
+	fetch: app.fetch,
+	scheduled: scheduledHandler,
+}
