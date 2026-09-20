@@ -2,14 +2,15 @@
 	"name": "master-library-catalog",
 	"version": "0.1.0",
 	"private": true,
+	"packageManager": "pnpm@12.4.2",
 	"scripts": {
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"deploy": "wrangler deploy",
 		"cf-typegen": "wrangler types --include-runtime=false",
-		"typecheck": "npm run cf-typegen && tsc --noEmit -p tsconfig.json",
+		"typecheck": "pnpm run cf-typegen && tsc --noEmit -p tsconfig.json",
 		"test": "vitest --run",
-		"check": "npm run typecheck && npm test"
+		"check": "pnpm run typecheck && pnpm test"
 	},
 	"dependencies": {
 		"hono": "^4.9.0"

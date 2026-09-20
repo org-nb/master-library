@@ -5,8 +5,8 @@ This Cloudflare Worker implements the ADR-0001 catalog boundary: a D1-backed edi
 ## Local development
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Visit http://localhost:8787 to open the catalog UI. The API routes are served by the Worker before static assets, so `/api/*` requests remain available even when the SPA fallback is active.
