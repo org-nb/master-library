@@ -1,3 +1,5 @@
 .worktrees/
 # roborev snapshots
 /.roborev/
+.github/skills/
+**/__pycache__/

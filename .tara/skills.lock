@@ -1,0 +1,44 @@
+{
+  "gh-stack": {
+    "commit": "2bd699a544a09cb5c45a013d03416e0894b0454e",
+    "path": "skills/gh-stack",
+    "ref": "main",
+    "repo": "https://github.com/github/gh-stack"
+  },
+  "likec4-dsl": {
+    "commit": "f4c030724ec6ce83acb1111fa344301bab9f4242",
+    "path": "skills/likec4-dsl",
+    "ref": "main",
+    "repo": "https://github.com/likec4/likec4"
+  },
+  "mcp-builder": {
+    "commit": "34040c9c568585f6929bedeaad110ad08f079624",
+    "path": "skills/mcp-builder",
+    "ref": "main",
+    "repo": "https://github.com/anthropics/skills"
+  },
+  "skill-creator": {
+    "commit": "34040c9c568585f6929bedeaad110ad08f079624",
+    "path": "skills/skill-creator",
+    "ref": "main",
+    "repo": "https://github.com/anthropics/skills"
+  },
+  "webapp-testing": {
+    "commit": "34040c9c568585f6929bedeaad110ad08f079624",
+    "path": "skills/webapp-testing",
+    "ref": "main",
+    "repo": "https://github.com/anthropics/skills"
+  },
+  "cloudflare": {
+    "source": "cloudflare/skills",
+    "sourceType": "github",
+    "skillPath": "skills/cloudflare/SKILL.md",
+    "computedHash": "c9b25ff6c3be26e74162e7df183990f8ee76ad6d1ee37d9ca50b4dd23cb06ad1"
+  },
+  "workers-best-practices": {
+    "source": "cloudflare/skills",
+    "sourceType": "github",
+    "skillPath": "skills/workers-best-practices/SKILL.md",
+    "computedHash": "61834fa098e16280aae54e584f5a16e047391790b1e1e4995c0e9a111d6d75c3"
+  }
+}

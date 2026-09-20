@@ -3,10 +3,61 @@ name: deploy-development
 on:
   push:
     branches: [main]
+    tags: ['development-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: development-deploy
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify this run is current main or a current main-tag deployment
+        shell: bash
+        env:
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            echo "main push is allowed to deploy"
+            exit 0
+          fi
+
+          if [[ "$GITHUB_REF" == refs/tags/development-* ]]; then
+            git fetch origin main --depth=1
+            main_sha="$(git rev-parse origin/main)"
+            head_sha="$(git rev-parse HEAD)"
+
+            if [[ "$head_sha" != "$main_sha" ]]; then
+              echo "Tag deployment rejected: tag is not at the current main tip."
+              echo "Tag SHA: $head_sha"
+              echo "Main SHA: $main_sha"
+              exit 1
+            fi
+
+            echo "Tag deployment allowed: tag points at current main tip"
+            exit 0
+          fi
+
+          echo "Ref $GITHUB_REF is not eligible for development deployment."
+          exit 1
+
+  deploy:
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: development
     permissions:
       contents: read
@@ -25,8 +76,7 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: pnpm
-          cache-dependency-path: workers/catalog/pnpm-lock.yaml
+          package-manager-cache: false
 
       - name: Install deps
         working-directory: workers/catalog

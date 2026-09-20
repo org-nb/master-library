@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git@2026.6.16"]
+    },
+    "polars": {
+      "type": "http",
+      "url": "https://mcp.pola.rs/mcp"
+    },
+    "likec4": {
+      "command": "npx",
+      "args": ["-y", "@likec4/mcp@1.58.0"]
+    },
+    "cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-docs": {
+      "type": "http",
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-bindings": {
+      "type": "http",
+      "url": "https://bindings.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-builds": {
+      "type": "http",
+      "url": "https://builds.mcp.cloudflare.com/mcp"
+    },
+    "cloudflare-observability": {
+      "type": "http",,
+      "url": "https://observability.mcp.cloudflare.com/mcp"
+    }
+  }
+}

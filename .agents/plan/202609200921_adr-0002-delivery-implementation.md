@@ -7,6 +7,33 @@ Target ADR: [ADR-0002](../../docs/adr/0002-isolate-dev-and-prod-delivery.md).
 Application prerequisite: [ADR-0001](../../docs/adr/0001-use-d1-for-video-catalog.md).
 Links above are relative to the intended `.agents/plan/` publication location.
 
+## Current status
+
+Completed to date:
+- secure CI gate created at `.github/workflows/ci.yml`
+- first delivery bootstrap placeholders added under `infra/` and `config/environments/`
+- no live Cloudflare account IDs, secrets, or production state values were added
+- environment contract validation and JSON file loading are implemented in
+  `src/master_library/delivery_config.py`
+- deterministic config rendering is implemented for downstream deployment tooling
+
+Remaining work:
+- validate the catalog Worker readiness gate before any live delivery
+- replace placeholder environment config with reviewed dev/prod inputs
+- bootstrap encrypted state and backend locking
+- implement GitHub env protections and the dev/prod deployment workflows
+
+## Progress update
+
+2026-09-20:
+- implemented `DeliveryConfig.from_file`, `from_json`, `render`, and `render_json`
+- added validation to reject cross-environment dev/prod naming mismatches
+- added tests covering placeholder rejection, valid values, file loading and canonical render output
+- added a first Worker sync pipeline contract in `workers/catalog/src/pipeline.ts` with inventory summaries for public and scheduled worker jobs
+- added a scheduled Cloudflare handler plus regression coverage for queue-style sync summaries in `workers/catalog/src/index.ts` and `workers/catalog/test/index.spec.ts`
+- switched the catalog Worker to pnpm for package management and validated the repo with `pnpm run check`
+- next step is to expand the local Gate A boundary with a real config policy test matrix and the first validated worker contract docs before any live Cloudflare or GitHub mutation
+
 ## Goal and scope
 
 Deliver the real catalog Worker through GitHub Actions into separate existing
