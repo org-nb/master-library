@@ -1,7 +1,0 @@
-name = "master-library-ingestion"
-main = "src/entry.py"
-compatibility_date = "2026-06-07"
-compatibility_flags = ["python_workers"]
-
-[triggers]
-crons = ["*/5 * * * *", "*/15 * * * *"]
