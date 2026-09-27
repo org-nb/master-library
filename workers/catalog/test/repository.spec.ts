@@ -1,8 +1,6 @@
-import { env } from 'cloudflare:test'
+import { applyD1Migrations, env } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { migration0001, migration0002, migration0003 } from '../src/db/migrations'
 import { D1CatalogRepository } from '../src/db/repository'
-import { runMigration } from '../src/db/runner'
 
 describe('D1CatalogRepository', () => {
 	let repo: D1CatalogRepository
@@ -21,8 +19,9 @@ describe('D1CatalogRepository', () => {
 		await db.exec('DROP TABLE IF EXISTS series;')
 		await db.exec('DROP TABLE IF EXISTS transcript_sources;')
 		await db.exec('DROP TABLE IF EXISTS videos;')
+		await db.exec('DROP TABLE IF EXISTS d1_migrations;')
 
-		await runMigration(db, migration0001)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS.slice(0, 1))
 
 		await db
 			.prepare(
@@ -35,8 +34,7 @@ describe('D1CatalogRepository', () => {
 			)
 			.run()
 
-		await runMigration(db, migration0002)
-		await runMigration(db, migration0003)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS)
 
 		repo = new D1CatalogRepository(db)
 	})
@@ -60,6 +58,29 @@ describe('D1CatalogRepository', () => {
 	it('returns null when getting a non-existent video', async () => {
 		const video = await repo.getVideo('does-not-exist')
 		expect(video).toBeNull()
+	})
+
+	it.each([
+		{ currentVersionId: 'ver-vid-001-v2', expected: 'ver-vid-001-v2' },
+		{ currentVersionId: null, expected: 'ver-vid-001-v1' },
+		{ currentVersionId: 'missing-version', expected: 'missing-version' },
+	])('uses current version $currentVersionId consistently across queries', async ({ currentVersionId, expected }) => {
+		await db
+			.prepare(
+				`INSERT INTO video_versions (id, video_id, version_number, label)
+				 VALUES ('ver-vid-001-v2', 'vid-001', 2, 'Re-edited')`,
+			)
+			.run()
+		await db.prepare('UPDATE videos SET current_version_id = ? WHERE id = ?').bind(currentVersionId, 'vid-001').run()
+
+		const video = await repo.getVideo('vid-001')
+		const listed = (await repo.listVideos()).find((item) => item.id === 'vid-001')
+		const searched = (await repo.searchVideos('Bodhisattva'))[0]
+
+		expect(video?.currentVersionId).toBe(expected)
+		expect(listed?.currentVersionId).toBe(expected)
+		expect(searched?.currentVersionId).toBe(expected)
+		expect(video?.versions.map((version) => version.versionNumber)).toEqual([1, 2])
 	})
 
 	it('searches videos across title, description, contributors and topics', async () => {

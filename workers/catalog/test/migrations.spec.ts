@@ -1,15 +1,25 @@
-import { env } from 'cloudflare:test'
+import { applyD1Migrations, env } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
-import { migration0001, migration0002, migration0003 } from '../src/db/migrations'
-import { runMigration } from '../src/db/runner'
 
 describe('D1 migrations: 0001, 0002, 0003', () => {
+	it('preserves semicolons in literals, comments, and trigger bodies', async () => {
+		const db = env.DB as D1Database
+		await applyD1Migrations(db, env.TEST_SQL_MIGRATIONS, 'sql_syntax_migrations')
+
+		expect(await db.prepare('SELECT value FROM sql_syntax_probe').all()).toMatchObject({
+			results: [{ value: 'default;value' }],
+		})
+		expect(await db.prepare('SELECT value FROM sql_syntax_audit ORDER BY rowid').all()).toMatchObject({
+			results: [{ value: 'first;entry' }, { value: "it's;second" }],
+		})
+	})
+
 	it('executes migrations and backfills legacy records correctly into BBC profile and asset tables', async () => {
 		const db = env.DB as D1Database
 		expect(db).toBeDefined()
 
 		// Execute 0001
-		await runMigration(db, migration0001)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS.slice(0, 1))
 
 		// Insert legacy seed data into videos
 		await db
@@ -23,8 +33,7 @@ describe('D1 migrations: 0001, 0002, 0003', () => {
 			.run()
 
 		// Execute 0002 (BBC profile tables) and 0003 (Backfill)
-		await runMigration(db, migration0002)
-		await runMigration(db, migration0003)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS)
 
 		// Verify video_versions backfill
 		const versionsResult = await db.prepare('SELECT * FROM video_versions ORDER BY video_id').all()

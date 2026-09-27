@@ -1,8 +1,6 @@
-import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test'
+import { applyD1Migrations, createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test'
 import { beforeEach, describe, expect, it } from 'vitest'
 import appModule from '../src/app'
-import { migration0001, migration0002, migration0003 } from '../src/db/migrations'
-import { runMigration } from '../src/db/runner'
 
 describe('master-library catalog worker with D1 and BBC profile', () => {
 	const db = env.DB as D1Database
@@ -32,8 +30,9 @@ describe('master-library catalog worker with D1 and BBC profile', () => {
 		await db.exec('DROP TABLE IF EXISTS series;')
 		await db.exec('DROP TABLE IF EXISTS transcript_sources;')
 		await db.exec('DROP TABLE IF EXISTS videos;')
+		await db.exec('DROP TABLE IF EXISTS d1_migrations;')
 
-		await runMigration(db, migration0001)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS.slice(0, 1))
 
 		await db
 			.prepare(
@@ -45,8 +44,7 @@ describe('master-library catalog worker with D1 and BBC profile', () => {
 			)
 			.run()
 
-		await runMigration(db, migration0002)
-		await runMigration(db, migration0003)
+		await applyD1Migrations(db, env.TEST_MIGRATIONS)
 
 		// Also add a ready R2 MP4 asset for vid-pub-01 version 1
 		await db
@@ -171,6 +169,80 @@ describe('master-library catalog worker with D1 and BBC profile', () => {
 		expect(payload.protocol).toBe('hls')
 		expect(payload.url).toContain('manifest/video.m3u8')
 	})
+
+	it.each([
+		{ requestedVersionId: undefined, expectedVersionId: 'ver-vid-pub-01-v2', expectedAssetId: 'asset-pub-01-r2-v2' },
+		{
+			requestedVersionId: 'ver-vid-pub-01-v1',
+			expectedVersionId: 'ver-vid-pub-01-v1',
+			expectedAssetId: 'asset-pub-01-r2',
+		},
+	])(
+		'resolves playback with version override $requestedVersionId',
+		async ({ requestedVersionId, expectedVersionId, expectedAssetId }) => {
+			await db
+				.prepare(
+					`INSERT INTO video_versions (id, video_id, version_number, label)
+				 VALUES ('ver-vid-pub-01-v2', 'vid-pub-01', 2, 'Re-edited')`,
+				)
+				.run()
+			await db
+				.prepare(
+					`INSERT INTO video_assets (id, video_version_id, location_id, external_id, kind, is_source, state, playback_enabled)
+				 VALUES ('asset-pub-01-r2-v2', 'ver-vid-pub-01-v2', 'loc-r2-dev', 'videos/vid-pub-01/v2/source.mp4', 'file', 1, 'ready', 1)`,
+				)
+				.run()
+			await db
+				.prepare(
+					`INSERT INTO asset_playback_entries (id, asset_id, protocol, entry_path)
+				 VALUES ('entry-pub-01-r2-v2', 'asset-pub-01-r2-v2', 'mp4', '')`,
+				)
+				.run()
+			await db.prepare(`UPDATE videos SET current_version_id = 'ver-vid-pub-01-v2' WHERE id = 'vid-pub-01'`).run()
+
+			const request = new Request('https://example.com/api/videos/vid-pub-01/playback', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ versionId: requestedVersionId }),
+			})
+			const ctx = createExecutionContext()
+			const response = await appModule.fetch(request, runtimeEnv, ctx)
+			await waitOnExecutionContext(ctx)
+
+			expect(response.status).toBe(200)
+			expect(await response.json()).toMatchObject({
+				versionId: expectedVersionId,
+				assetId: expectedAssetId,
+			})
+		},
+	)
+
+	it.each(['missing-version', 'ver-vid-draft-02-v1', 'deleted-version', ''])(
+		'rejects an unavailable current version: %s',
+		async (currentVersionId) => {
+			await db
+				.prepare(
+					`INSERT INTO video_versions (id, video_id, version_number, label, deleted_at)
+					 VALUES ('deleted-version', 'vid-pub-01', 2, 'Withdrawn', CURRENT_TIMESTAMP)`,
+				)
+				.run()
+			await db
+				.prepare('UPDATE videos SET current_version_id = ? WHERE id = ?')
+				.bind(currentVersionId, 'vid-pub-01')
+				.run()
+			const request = new Request('https://example.com/api/videos/vid-pub-01/playback', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: '{}',
+			})
+			const ctx = createExecutionContext()
+			const response = await appModule.fetch(request, runtimeEnv, ctx)
+			await waitOnExecutionContext(ctx)
+
+			expect(response.status).toBe(400)
+			expect(await response.json()).toEqual({ error: `Requested version ${currentVersionId} not found` })
+		},
+	)
 
 	it('fails closed on playback for private or non-existent video', async () => {
 		const request = new Request('https://example.com/api/videos/vid-draft-02/playback', {

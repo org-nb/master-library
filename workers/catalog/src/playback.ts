@@ -22,7 +22,7 @@ export class PlaybackResolver {
 			throw new Error('Video is not published or public')
 		}
 
-		const versionId = request.versionId || video.currentVersionId || video.versions[0]?.id
+		const versionId = request.versionId ?? video.currentVersionId ?? video.versions[0]?.id
 		const version = video.versions.find((v: VideoVersion) => v.id === versionId)
 		if (!version) {
 			throw new Error(`Requested version ${versionId} not found`)

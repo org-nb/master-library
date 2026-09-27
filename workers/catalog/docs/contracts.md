@@ -20,6 +20,7 @@ This document specifies the operational and interface contracts for the Master L
 - A file can be both `is_source = true` and `playback_enabled = true` (e.g. standard fast-start progressive MP4).
 - Incompatible media are kept with `is_source = true`, `playback_enabled = false`, `state = 'failed'`, and `error_code = 'conversion_required'`.
 - Playback selection checks `current_version_id`, verifies `playback_enabled = true`, `state = 'ready'`, `deleted_at IS NULL`, and selects according to backend priority (`r2` first).
+- Catalog list, detail, and search responses honor `videos.current_version_id`. Only a null pointer falls back to the lowest-numbered non-deleted version. An explicit playback `versionId` overrides the default; a missing, deleted, or foreign current version fails playback rather than silently selecting another edition.
 
 ## 3. Public vs Protected API Contracts
 
@@ -29,3 +30,16 @@ This document specifies the operational and interface contracts for the Master L
 - `GET /api/search?q=...`: Bounded search over titles, descriptions, contributors, and subjects.
 - `POST /api/videos/:id/playback`: Resolves playback grant for the specified protocol (`mp4`, `hls`). Fails closed if not published or no eligible ready asset.
 - Protected operator routes (`POST /api/operator/*`): Restricted to authenticated operator context; fails closed when caller is unauthenticated.
+
+## 4. Migration Test Source
+
+The `migrations/*.sql` files are the single source for deployment and D1 tests.
+Vitest loads them in migration order with Cloudflare's `readD1Migrations` and
+applies them with `applyD1Migrations`. Tests seed legacy records after migration
+0001, then apply the remaining migrations to exercise the upgrade path.
+There are no manually copied SQL constants or custom statement splitters.
+
+Run `pnpm test test/migrations.spec.ts test/repository.spec.ts test/app.spec.ts`
+from `workers/catalog` for the migration and current-version regression examples.
+The SQL syntax fixture also exercises quoted semicolons, comments, and a
+multi-statement trigger using the same migration loader.

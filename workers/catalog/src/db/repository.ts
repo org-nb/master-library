@@ -9,6 +9,7 @@ interface VideoRow {
 	language: string
 	status: string
 	visibility: string
+	current_version_id: string | null
 	duration_seconds: number
 	updated_at: string
 }
@@ -196,7 +197,7 @@ export class D1CatalogRepository implements CatalogRepository {
 				status: v.status as any,
 				visibility: v.visibility as any,
 				language: v.language,
-				currentVersionId: versions[0]?.id,
+				currentVersionId: v.current_version_id ?? versions[0]?.id,
 				contributors,
 				topics,
 				versions,
@@ -211,7 +212,7 @@ export class D1CatalogRepository implements CatalogRepository {
 		const status = filter.status ?? 'published'
 		const visibility = filter.visibility ?? 'public'
 
-		let query = `SELECT id, series_id, position, title, description, language, status, visibility, duration_seconds, updated_at
+		let query = `SELECT id, series_id, position, title, description, language, status, visibility, current_version_id, duration_seconds, updated_at
 		             FROM videos WHERE 1=1`
 		const params: (string | number)[] = []
 
@@ -237,7 +238,7 @@ export class D1CatalogRepository implements CatalogRepository {
 	async getVideo(id: string): Promise<VideoRecord | null> {
 		const { results } = await this.db
 			.prepare(
-				`SELECT id, series_id, position, title, description, language, status, visibility, duration_seconds, updated_at
+				`SELECT id, series_id, position, title, description, language, status, visibility, current_version_id, duration_seconds, updated_at
 				 FROM videos
 				 WHERE id = ?`,
 			)
@@ -263,7 +264,7 @@ export class D1CatalogRepository implements CatalogRepository {
 
 		const { results } = await this.db
 			.prepare(
-				`SELECT DISTINCT v.id, v.series_id, v.position, v.title, v.description, v.language, v.status, v.visibility, v.duration_seconds, v.updated_at
+				`SELECT DISTINCT v.id, v.series_id, v.position, v.title, v.description, v.language, v.status, v.visibility, v.current_version_id, v.duration_seconds, v.updated_at
 				 FROM videos v
 				 LEFT JOIN video_contributors vc ON vc.video_id = v.id
 				 LEFT JOIN people p ON p.id = vc.person_id
