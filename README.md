@@ -3,7 +3,7 @@
 This repository is in a transition from the historical Airtable ingestion and publication worker to the catalog architecture set out in ADR-0001 and ADR-0002.
 
 Status:
-- ADR-0001: Proposed. D1-backed editorial catalog with R2 transcript storage and hybrid search.
+- ADR-0001: Proposed. R2-first ingest and playback, a minimal BBC Programmes catalog profile in D1, optional Stream/S3 copies, private transcript storage and derived search.
 - ADR-0002: Proposed. Separate development and production delivery accounts with infrastructure-as-code and guarded release promotion.
 - The legacy `workers/ingestion` project has been retired from this branch and is treated as historical rather than current operational code.
 
@@ -110,6 +110,7 @@ A deployment workflow should not expand the scope of a secret accidentally. Do n
 - [OpenTofu state encryption](https://opentofu.org/docs/language/state/encryption/)
 - [OpenTofu S3 remote state backend](https://opentofu.org/docs/language/settings/backends/s3/)
 - [ADR-0002: Isolate development and production delivery](docs/adr/0002-isolate-dev-and-prod-delivery.md)
+- [Video backend costs and capabilities: R2, Stream and S3](docs/Cloudflare%20R2%20vs.%20Stream.md)
 
 ## Architecture and design records
 
@@ -117,6 +118,7 @@ A deployment workflow should not expand the scope of a secret accidentally. Do n
 - [ADR-0002: Isolate development and production delivery](docs/adr/0002-isolate-dev-and-prod-delivery.md)
 - [Design index](.agents/design/index.md)
 - [Plan index](.agents/plan/index.md)
+- [ADR-0001 multi-backend implementation plan](.agents/plan/202609270916_adr-0001-multi-backend-implementation.md)
 - [Review index](.agents/review/index.md)
 - [Annotation process sequence](docs/annotation-process-sequence.mermaid)
 - [DPR process diagram](docs/dpr_process_complete.mermaid)
@@ -129,6 +131,16 @@ The repository is currently split by stack layer.
 - `catalog/implementation` is reserved for the ADR-0001 local implementation after the design commit is reviewed and committed.
 
 No deployment, provisioning, or live platform changes are part of this branch state.
+
+The provider-neutral model is design only. The current catalog scaffold and
+initial SQL migration still require `stream_uid`. ADR-0001 specifies the
+follow-up migration: logical video -> content version -> backend assets, with
+per-version playback selection. Copies of the same edition on R2 and Stream
+share a version ID; an edited cut has a different version ID. R2 is the first
+and default ingest/playback path: validate MP4 first, then add adaptive HLS.
+Stream and S3 are optional. BBC Episode/Version/Series and contributor/subject
+concepts guide the relational model; backend copies remain local extensions.
+No graph database or full production ontology is required.
 
 ## Historical records
 

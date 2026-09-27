@@ -7,6 +7,20 @@ Target ADR: [ADR-0002](../../docs/adr/0002-isolate-dev-and-prod-delivery.md).
 Application prerequisite: [ADR-0001](../../docs/adr/0001-use-d1-for-video-catalog.md).
 Links above are relative to the intended `.agents/plan/` publication location.
 
+## R2-first release-profile update, 2026-09-27
+
+Use the [current application plan](202609270916_adr-0001-multi-backend-implementation.md)
+for readiness gates. Initial delivery targets A-R2/B-R2: private R2 upload,
+D1 catalog and authorized MP4 playback. Complete the mandatory-UID schema
+cutover before enabling R2 ingest. No Stream webhook, Stream credential,
+Vectorize or AWS integration is an initial delivery prerequisite.
+
+The Stream/vector provisioning, subscription activation and qualification
+steps below apply only when their optional release profiles are enabled.
+Initial smoke tests cover R2 registration/completion, browsing, range playback
+and renewal; later profiles add their own tests. This update takes precedence
+over the older all-services readiness wording below.
+
 ## Current status
 
 Completed to date:

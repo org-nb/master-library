@@ -4,6 +4,11 @@ Freeform session notes and handover scratch. One row per doc, newest first. New 
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
+| 2026-09-27 | [202609271102_catalog-review-fixes.md](202609271102_catalog-review-fixes.md) | Honored current-version pointers and replaced duplicate SQL/custom splitting with Cloudflare migration test helpers. |
+| 2026-09-27 | [202609271046_adr-0001-implementation-p0-p2.md](202609271046_adr-0001-implementation-p0-p2.md) | Implemented P0, P1, P2 and baseline resolver: BBC profile mapping, D1 migrations 0002/0003, repository, and playback API. |
+| 2026-09-27 | [202609270946_r2-first-bbc-profile.md](202609270946_r2-first-bbc-profile.md) | Revised ADR/plan for R2-first MP4 ingest and minimal BBC catalog semantics; optional Stream/S3 and schema simplifications. |
+| 2026-09-27 | [202609270916_adr-0001-implementation-plan.md](202609270916_adr-0001-implementation-plan.md) | Published the revised ADR-0001 implementation sequence and superseded the Stream-only plan; execution remains unstarted. |
+| 2026-09-27 | [202609270903_multi-backend-video-design.md](202609270903_multi-backend-video-design.md) | Proposed R2/Stream/S3 versioned assets, playback and migration contracts; corrected pricing and aligned delivery/story docs. |
 | 2026-09-20 | [202609201521_upload-browse-catalog-story.md](202609201521_upload-browse-catalog-story.md) | Drafted the upload-and-browse story (Stream UI first cut) with drafted issue body; issue creation blocked on disabled GitHub issues. |
 | 2026-09-20 | [202609200957_catalog-design-stack-prep.md](202609200957_catalog-design-stack-prep.md) | Prepared the `catalog/design` layer and kept the implementation-note handoff out of the documentation-only commit. |
 | 2026-09-20 | [202609200936_adr-0001-catalog-plan.md](202609200936_adr-0001-catalog-plan.md) | Published the ADR-0001 catalog implementation plan with distinct local and live qualification gates. |

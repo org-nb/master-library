@@ -1,0 +1,186 @@
+{
+	"series": [
+		{
+			"id": "series-001",
+			"title": "Heart Sutra Intensive 2026",
+			"description": "A weekend intensive exploration of Prajnaparamita teachings."
+		}
+	],
+	"people": [
+		{
+			"id": "person-001",
+			"display_name": "Sister Yeshe"
+		},
+		{
+			"id": "person-002",
+			"display_name": "Bhante Ananda"
+		}
+	],
+	"topics": [
+		{
+			"id": "topic-001",
+			"label": "Compassion"
+		},
+		{
+			"id": "topic-002",
+			"label": "Emptiness"
+		}
+	],
+	"videos": [
+		{
+			"id": "video-001",
+			"series_id": "series-001",
+			"position": 1,
+			"title": "The Compassionate Heart",
+			"description": "A guided teaching on cultivating compassion in daily practice.",
+			"language": "en",
+			"status": "published",
+			"visibility": "public",
+			"current_version_id": "ver-001-v1",
+			"contributors": [
+				{
+					"person_id": "person-001",
+					"role": "teacher"
+				}
+			],
+			"topics": ["topic-001"],
+			"versions": [
+				{
+					"id": "ver-001-v1",
+					"version_number": 1,
+					"label": "Original Uncut",
+					"language": "en",
+					"duration_seconds": 1846,
+					"preferred_asset_id": "asset-001-r2-mp4",
+					"assets": [
+						{
+							"id": "asset-001-r2-mp4",
+							"location_id": "loc-r2-dev",
+							"external_id": "videos/video-001/v1/source.mp4",
+							"kind": "file",
+							"is_source": true,
+							"state": "ready",
+							"playback_enabled": true,
+							"byte_size": 245000000,
+							"sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							"playback_entries": [
+								{
+									"protocol": "mp4",
+									"entry_path": ""
+								}
+							]
+						},
+						{
+							"id": "asset-001-stream-copy",
+							"location_id": "loc-stream-dev",
+							"external_id": "f8a7c6e5d4c3b2a10987654321fedcba",
+							"kind": "managed",
+							"is_source": false,
+							"state": "ready",
+							"playback_enabled": true,
+							"playback_entries": [
+								{
+									"protocol": "hls",
+									"entry_path": "manifest/video.m3u8"
+								}
+							]
+						}
+					]
+				},
+				{
+					"id": "ver-001-v2",
+					"version_number": 2,
+					"label": "Shortened 30-min Edit",
+					"language": "en",
+					"duration_seconds": 1800,
+					"preferred_asset_id": "asset-001-v2-r2",
+					"assets": [
+						{
+							"id": "asset-001-v2-r2",
+							"location_id": "loc-r2-dev",
+							"external_id": "videos/video-001/v2/edit.mp4",
+							"kind": "file",
+							"is_source": true,
+							"state": "ready",
+							"playback_enabled": true,
+							"byte_size": 220000000,
+							"sha256": "a3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							"playback_entries": [
+								{
+									"protocol": "mp4",
+									"entry_path": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "video-002",
+			"series_id": "series-001",
+			"position": 2,
+			"title": "Wisdom and Emptiness",
+			"description": "Contemplation on the Prajnaparamita text.",
+			"language": "en",
+			"status": "published",
+			"visibility": "public",
+			"current_version_id": "ver-002-v1",
+			"contributors": [
+				{
+					"person_id": "person-002",
+					"role": "teacher"
+				}
+			],
+			"topics": ["topic-002"],
+			"versions": [
+				{
+					"id": "ver-002-v1",
+					"version_number": 1,
+					"label": "Original Ingest",
+					"language": "en",
+					"duration_seconds": 1450,
+					"preferred_asset_id": "asset-002-r2-mp4",
+					"assets": [
+						{
+							"id": "asset-002-r2-mp4",
+							"location_id": "loc-r2-dev",
+							"external_id": "videos/video-002/v1/source.mp4",
+							"kind": "file",
+							"is_source": true,
+							"state": "ready",
+							"playback_enabled": true,
+							"byte_size": 195000000,
+							"playback_entries": [
+								{
+									"protocol": "mp4",
+									"entry_path": ""
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"locations": [
+		{
+			"id": "loc-r2-dev",
+			"backend": "r2",
+			"environment": "dev",
+			"account_id": "cf-account-dev-123",
+			"bucket_name": "master-library-catalog-dev",
+			"region": null,
+			"enabled": true
+		},
+		{
+			"id": "loc-stream-dev",
+			"backend": "stream",
+			"environment": "dev",
+			"account_id": "cf-account-dev-123",
+			"bucket_name": null,
+			"region": null,
+			"enabled": true
+		}
+	]
+}

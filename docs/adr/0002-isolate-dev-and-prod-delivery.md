@@ -51,10 +51,25 @@ OpenTofu for infrastructure, Wrangler for Worker delivery and migrations, and
 GitHub Actions for CI/CD**.
 
 Development and production accounts each own their Worker, D1 database, private
-R2 bucket, Queues and dead-letter Queue, Vectorize index, Stream library, webhook
-signing secret, credentials and remote state backend. Development contains only
+R2 buckets, Queues and dead-letter Queue, credentials and remote state backend.
+Add a Vectorize index when search is enabled, and a Stream library/webhook
+signing secret only for the optional Stream release profile. Initial R2
+ingest/MP4 delivery requires neither Stream nor AWS. Development contains only
 synthetic or explicitly sanitized fixtures. Account IDs are checked against an
 environment allowlist before every mutating command.
+
+The provider-neutral asset model in ADR-0001 extends this boundary to every
+enabled media location. R2 media buckets are separate from transcript and state
+buckets. Stream libraries remain account-scoped. If S3 is enabled, use separate
+development and production AWS accounts, private buckets and CloudFront
+distributions, with environment-specific signing keys and credentials.
+No AWS resources are required for an R2-only or R2/Stream deployment.
+
+D1 location IDs resolve only to allowlisted resources for the active environment.
+Copying catalog rows between environments must not copy live production locators
+or grant access to production media. Fixtures use synthetic assets and
+environment-specific mappings. The existing renderer and delivery workflows
+do not yet implement these additional location/profile contracts.
 
 Separate accounts are selected for **authorization isolation**, not merely resource
 namespacing. A `dev-` or `prod-` prefix can prevent confusion, but it cannot stop
@@ -165,6 +180,7 @@ export complete state into configuration files.
 | Owner | Version-controlled responsibility |
 | --- | --- |
 | OpenTofu Cloudflare roots | D1 containers, R2 buckets, Queue and dead-letter Queue resources, Vectorize indexes, supported DNS, and Stream webhook subscription |
+| Optional OpenTofu AWS roots | S3 media buckets, Block Public Access, CloudFront distributions/OAC/key groups, and least-privilege IAM policies for enabled S3 locations |
 | Wrangler | Worker code, bindings, vars, compatibility settings, observability, routes, schedules, Queue producer/consumer settings and D1 migrations |
 | Migration runner | Ordered, append-only D1 SQL migrations and applied-version checks |
 | GitHub control-plane bootstrap | Repository rulesets, GitHub environments, protection rules, variables, required checks and tag restrictions |
@@ -182,6 +198,13 @@ credentials. Production credentials are available only to protected production
 jobs after approval. Development credentials cannot access production accounts.
 Read-only planning credentials and state access are still sensitive because state
 can contain secrets; trusted plan jobs run only from protected code.
+
+For optional AWS deployment, use GitHub OIDC with environment-scoped IAM roles
+and trust conditions, not shared long-lived deployment keys. Runtime ingestion,
+playback signing and infrastructure provisioning have separate permissions.
+The catalog's CloudFront signing key does not grant S3 write access. Any direct
+runtime S3 access needs its own least-privilege, rotated credential contract;
+deployment OIDC credentials are not a runtime authentication mechanism.
 
 Every workflow starts with `permissions: contents: read`, grants only job-specific
 permissions, disables checkout credential persistence, sets a timeout and uses
@@ -239,8 +262,9 @@ revision and IaC revision. Generate provenance attestations where supported.
 Serialize development mutation. Check the expected account ID, review the
 development plan, and stop on unexpected deletion or replacement. Apply the exact
 saved development plan; render configuration; run compatible schema expansion;
-deploy the retained artifact without rebuilding; activate consumers, schedules and
-the Stream webhook only after the Worker and secrets exist; then run synthetic-data
+deploy the retained artifact without rebuilding; activate the release profile's
+consumers and schedules only after the Worker and secrets exist. Activate a
+Stream webhook only for an explicitly enabled Stream profile. Then run synthetic-data
 integration and smoke tests. Mark the artifact development-verified only after all
 steps succeed.
 
