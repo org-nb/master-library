@@ -1,5 +1,9 @@
 # Implement ADR-0001: D1 video catalog
 
+Superseded on 2026-09-27 by the
+[multi-backend implementation plan](202609270916_adr-0001-multi-backend-implementation.md).
+Retained as historical context; use the new plan for execution and delivery gates.
+
 Status: Proposed implementation plan. Publishing it does not authorize backend
 implementation, data migration, deployment, or shared-infrastructure changes.
 

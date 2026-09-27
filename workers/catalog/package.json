@@ -8,14 +8,17 @@
 		"start": "wrangler dev",
 		"deploy": "wrangler deploy",
 		"cf-typegen": "wrangler types --include-runtime=false",
+		"lint": "biome check .",
+		"format": "biome format --write .",
 		"typecheck": "pnpm run cf-typegen && tsc --noEmit -p tsconfig.json",
 		"test": "vitest --run",
-		"check": "pnpm run typecheck && pnpm test"
+		"check": "pnpm run lint && pnpm run typecheck && pnpm test"
 	},
 	"dependencies": {
 		"hono": "^4.9.0"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.5.14",
 		"@cloudflare/vite-plugin": "^1.17.1",
 		"@cloudflare/vitest-plugin": "^1.1.13",
 		"@cloudflare/workers-types": "^5.20260920.1",

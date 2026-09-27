@@ -1,13 +1,14 @@
-import { env, createExecutionContext, waitOnExecutionContext } from 'cloudflare:test'
+import { createExecutionContext, env, waitOnExecutionContext } from 'cloudflare:test'
 import { describe, expect, it } from 'vitest'
 import { catalogVideos, listCatalogVideos, searchCatalogVideos, type VideoRecord } from '../src/catalog'
-import { summarizeCatalogVideos } from '../src/pipeline'
 import worker from '../src/index'
+import { summarizeCatalogVideos } from '../src/pipeline'
 
 const runtimeEnv = {
 	...env,
 	ASSETS: {
-		fetch: async (request: Request) => new Response(`<!doctype html><title>Catalog</title>`, { status: 200, headers: { 'content-type': 'text/html' } }),
+		fetch: async (_request: Request) =>
+			new Response(`<!doctype html><title>Catalog</title>`, { status: 200, headers: { 'content-type': 'text/html' } }),
 	},
 	DB: undefined,
 	CATALOG_STORAGE: undefined,
@@ -79,19 +80,22 @@ describe('master-library catalog worker', () => {
 	})
 
 	it('summarizes safe public catalog availability for sync jobs', () => {
-		const summary = summarizeCatalogVideos([...catalogVideos, {
-			id: 'hidden-003',
-			title: 'Hidden Sync Job',
-			description: 'Private content hidden from sync summaries.',
-			teacher: 'Private Teacher',
-			topic: 'Practice',
-			status: 'ready',
-			visibility: 'private',
-			language: 'en',
-			stream_uid: 'hidden-sync',
-			duration_seconds: 600,
-			updated_at: '2026-09-21T00:00:00.000Z',
-		} as VideoRecord])
+		const summary = summarizeCatalogVideos([
+			...catalogVideos,
+			{
+				id: 'hidden-003',
+				title: 'Hidden Sync Job',
+				description: 'Private content hidden from sync summaries.',
+				teacher: 'Private Teacher',
+				topic: 'Practice',
+				status: 'ready',
+				visibility: 'private',
+				language: 'en',
+				stream_uid: 'hidden-sync',
+				duration_seconds: 600,
+				updated_at: '2026-09-21T00:00:00.000Z',
+			} as VideoRecord,
+		])
 
 		expect(summary.visible).toBe(4)
 		expect(summary.hidden).toBe(1)
