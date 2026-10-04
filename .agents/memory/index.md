@@ -4,6 +4,8 @@ Freeform session notes and handover scratch. One row per doc, newest first. New 
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
+| 2026-10-04 | [202610041945_phase-a-bff-implemented.md](202610041945_phase-a-bff-implemented.md) | Phase A (A1-A8) implemented in app/: 93 unit + 7 oxivault integration tests green, container smoke-tested, app CI workflow added; Phase B next. |
+| 2026-10-04 | [202610041546_backtrack-to-master-library-lod.md](202610041546_backtrack-to-master-library-lod.md) | Place registry moved to the new master-library-lod repo (Turtle, schema.org-first); in-repo data/vault work unset; ADR-0003 split is an open decision. |
 | 2026-10-04 | [202610041648_implementation-plan.md](202610041648_implementation-plan.md) | Published the BFF-first implementation plan on oxivault 0.2.1; ADR-0003 amended for shared bucket and 0.2.1 capability split. |
 | 2026-10-04 | [202610041610_review-fixes-applied.md](202610041610_review-fixes-applied.md) | Applied all 11 review findings; publish is now copy-only (private source never deleted), pointer state machine keyed on verification. |
 | 2026-10-04 | [202610041602_adr-0005-google-oidc-auth.md](202610041602_adr-0005-google-oidc-auth.md) | ADR-0005: Google OIDC login, per-user GitHub-secret allowlist, stateless sessions with deploy-time revocation. |

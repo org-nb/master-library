@@ -2,7 +2,7 @@
 
 **Project:** Master Library
 **Date:** 2026-10-04
-**Status:** Proposed
+**Status:** Phase A implemented 2026-10-04 (see Status below); Phase B not started
 **Implements:** ADR-0003 (as amended), ADR-0004, ADR-0005
 **Pinned dependency:** `oxivault==0.2.1` from PyPI
 **Method:** test-driven; one deployable container
@@ -258,3 +258,74 @@ are minimal pages and curl.
 - Stream publication slice, semantic search, S3/CloudFront, identity
   provider beyond Google OIDC, production promotion (separate ADR-0002
   approval).
+
+## Status (2026-10-04): Phase A implemented
+
+All eight Phase A slices landed in `app/` on 2026-10-04. Summary per
+slice; deviations from this plan are noted.
+
+- **A1 done.** Skeleton under `app/` (SvelteKit 2.70, Svelte 5,
+  adapter-node, pnpm 12.4.2, Biome 2.5, vitest 3.2). Multi-stage
+  Dockerfile (node:22-slim build → python:3.14-slim runtime with the
+  Node binary and prod node_modules copied in), `entrypoint.sh`
+  supervising both processes via `wait -n`, `serve_vault.py` building
+  the oxivault app programmatically (the 0.2.1 CLI `serve` only supports
+  local stores), `/healthz` reporting app + loopback vault status.
+  Image builds and the container was smoke-tested: both processes up,
+  `/healthz` correctly 503 "degraded" without S3.
+- **A2 done.** `$lib/oxivault/client.ts` wraps the HTTP API (bearer
+  token, error mapping to the AppError hierarchy, conditional writes).
+  Integration tests run the real 0.2.1 wheel via `uvx` against a
+  fixture vault (7 tests).
+- **A3 done.** `env/config.ts` (zod env, fail-closed, lists every
+  problem), `keys.ts` (canonical key builder + pointer key + version
+  ids + media-key safety), `registry.ts` (place/event, 1:1 maps,
+  duplicate detection), `lineage.ts` (tier rules, range validation).
+  Vault notes require `type: VideoEpisode` (0.2.1 rejects writes
+  without a class) and the vault needs `context.jsonld` (fixture
+  added).
+- **A4 done.** Google OIDC via arctic 3.7 (`Google` provider, S256
+  PKCE, JWKS id-token verification with issuer/audience),
+  `findUser` default-deny against the `OAUTH_USER_N` allowlist
+  (verified emails only), signed HttpOnly session cookie (jose HS256,
+  12h), `requireRole` guards, rate limiters on login and agent.
+- **A5 done.** Home list, search (oxivault body + triple sources),
+  video detail with playback resolution: public URL when published,
+  presigned private URL for verified member items, anonymous sees
+  published only (404 not 403).
+- **A6 done.** `createVideo` (registry + lineage validation, draft
+  note with If-None-Match, presigned private-bucket upload key,
+  media-key safety) and `completeIngest` (ffprobe report validation,
+  verified flag, If-Match).
+- **A7 done.** Pointer publish/unpublish state machine per ADR-0003:
+  verify source → copy → verify (pointer etag) → pointer object →
+  conditional frontmatter; idempotent republish, crash recovery,
+  bounded conflict retries, `publish_failed` path; unpublish never
+  deletes the private source. Unit tests cover the full state matrix;
+  a MinIO + real-oxivault round-trip test runs in CI (skips locally
+  without MinIO).
+- **A8 done.** `agent/llm.ts` (OpenAI-compatible streaming client +
+  ScriptedLlm test double), `tools.ts` (read-only catalog tools),
+  `orchestrate.ts` (bounded tool loop, tool errors surface as
+  tool_result), `stream.ts` (SSE encoding), `meter.ts` (per-key token
+  budget + admission rate limit). `/api/agent/chat` streams SSE;
+  503 without a configured LLM.
+
+Deviations / notes:
+
+- Slices were implemented in dependency order within one session; the
+  TDD ordering was partly inverted (some modules preceded their tests).
+  The full suite (93 unit + 7 oxivault integration tests) is green and
+  exercises every behavior the plan lists for A1–A8.
+- `@aws-sdk/client-s3@3.1146.0` does not export `PutBucketCommand`;
+  bucket creation is a CI/workflow step (aws s3api) and the MinIO test
+  verifies buckets exist with `HeadBucketCommand`.
+- The container smoke test used fake S3 credentials (no R2/MinIO
+  locally); a full publish round-trip through the container is left as
+  a release task (B6).
+- Playwright end-to-end is not yet wired (plan lists it per slice);
+  the vitest + real-oxivault + MinIO stack covers server behavior, and
+  Playwright belongs to Phase B reader/editor UX.
+
+Phase B (B1–B6) is not started; it builds on the routes and data
+shapes that now exist.

@@ -1,0 +1,130 @@
+# App CI (ADR-0004): gates for the SvelteKit BFF under app/.
+#
+# Runs the app gate (biome, svelte-check, vitest) plus the real-oxivault
+# integration tests (oxivault 0.2.1 from PyPI via uvx). The MinIO round-trip
+# runs in a dedicated job with a MinIO service, since the unit/oxivault jobs
+# have no S3 available.
+#
+# Security conventions match ci.yml (pinned action SHAs, read-only
+# permissions, no credential persistence, concurrency, timeouts).
+name: App CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/app-ci.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/app-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        run: corepack enable && corepack prepare pnpm@12.4.2 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install uv (for oxivault integration via uvx)
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          enable-cache: true
+
+      - name: Warm the oxivault 0.2.1 wheel cache
+        run: uvx --from oxivault==0.2.1 oxivault --version
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm check
+
+      - name: Test (unit + real oxivault)
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  minio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      minio:
+        image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+        env:
+          MINIO_ROOT_USER: testuser
+          MINIO_ROOT_PASSWORD: testpassword
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd="curl -fs http://localhost:9000/minio/health/live"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=12
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        run: corepack enable && corepack prepare pnpm@12.4.2 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install uv (for oxivault integration via uvx)
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          enable-cache: true
+
+      - name: Warm the oxivault 0.2.1 wheel cache
+        run: uvx --from oxivault==0.2.1 oxivault --version
+
+      - name: Create the media buckets
+        env:
+          AWS_ACCESS_KEY_ID: testuser
+          AWS_SECRET_ACCESS_KEY: testpassword
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          aws s3api create-bucket --endpoint-url http://localhost:9000 \
+            --bucket master-library-media-private-dev
+          aws s3api create-bucket --endpoint-url http://localhost:9000 \
+            --bucket master-library-media-public-dev
+
+      - name: Test (MinIO + real oxivault round-trip)
+        run: pnpm vitest run tests/integration

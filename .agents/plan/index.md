@@ -4,7 +4,7 @@ Plans and execution plans. One row per doc, newest first. New files use `YYYYMMD
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
-| 2026-10-04 | [202610041648_bff-frontend-implementation.md](202610041648_bff-frontend-implementation.md) | TDD plan for the single-container app: oxivault 0.2.1 capability/gap split, BFF slices A1-A8, front-end slices B1-B6, CI and risks. |
+| 2026-10-04 | [202610041648_bff-frontend-implementation.md](202610041648_bff-frontend-implementation.md) | TDD plan for the single-container app: oxivault 0.2.1 capability/gap split, BFF slices A1-A8 (implemented 2026-10-04, status section at the end), front-end slices B1-B6, CI and risks. |
 | 2026-09-27 | [202609270916_adr-0001-multi-backend-implementation.md](202609270916_adr-0001-multi-backend-implementation.md) | Superseded by the ADR-0003 oxivault direction; retained for historical context. |
 | 2026-09-27 | [202609270903_multi-backend-video-design.md](202609270903_multi-backend-video-design.md) | Confirmed documentation-only update for R2, Stream and S3 costs, versioned assets, playback and migration design. |
 | 2026-09-20 | [202609201000_copilot-review-fix.md](202609201000_copilot-review-fix.md) | Review-fix plan covering GitHub Actions security hygiene, toolchain alignment, and branch cleanup before merge. |

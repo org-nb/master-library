@@ -10,6 +10,22 @@ Status:
 - ADR-0002: Proposed, scope revised by ADR-0003. Separate development and production delivery accounts remain, but delivery is no longer Cloudflare-only: the oxivault API runs on a container host.
 - The legacy `workers/ingestion` project has been retired from this branch and is treated as historical rather than current operational code. The `workers/catalog` D1 scaffold has no consumer under ADR-0003 and is pending retirement.
 
+## The app (Phase A: BFF)
+
+`app/` contains the SvelteKit BFF from the [implementation plan](.agents/plan/202610041648_bff-frontend-implementation.md) (slices A1–A8, 2026-10-04): the oxivault client, canonical key builder and registries, Google OIDC login with the per-user allowlist, catalog read routes, librarian ingest, the pointer-based publish/unpublish state machine, and the read-only agent infrastructure (SSE). The single container runs the SvelteKit Node server (public, port 3000) and the oxivault API (loopback, port 8000) in one image; see `app/Dockerfile` and `app/entrypoint.sh`.
+
+```bash
+cd app
+pnpm install
+pnpm lint            # biome check .
+pnpm check           # svelte-kit sync && svelte-check
+pnpm test            # vitest: unit + real oxivault 0.2.1 (uvx); MinIO round-trip needs MinIO up (docker compose up -d)
+pnpm build           # adapter-node output in build/
+docker build -t master-library-app .
+```
+
+Runtime configuration is documented in `app/.env.example`. CI gates live in `.github/workflows/app-ci.yml` (lint, types, tests, build, plus the MinIO publish round-trip).
+
 ## Configure GitHub development credentials
 
 Use this guide when you are a maintainer setting up the repository's `development` environment. This is for deployment and infrastructure bootstrap only after the relevant account and GitHub environment have been reviewed and approved. It does not create or validate credentials in this checkout, and it does not make the app deployable by itself.
