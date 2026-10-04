@@ -1,11 +1,12 @@
 # Master Library
 
-This repository is in a transition from the historical Airtable ingestion and publication worker to the catalog architecture set out in ADR-0001 and ADR-0002.
+This repository is in a transition from the historical Airtable ingestion and publication worker to the catalog architecture set out in ADR-0003.
 
 Status:
-- ADR-0001: Proposed. R2-first ingest and playback, a minimal BBC Programmes catalog profile in D1, optional Stream/S3 copies, private transcript storage and derived search.
-- ADR-0002: Proposed. Separate development and production delivery accounts with infrastructure-as-code and guarded release promotion.
-- The legacy `workers/ingestion` project has been retired from this branch and is treated as historical rather than current operational code.
+- ADR-0003: Proposed. oxivault (Vault-LD) as the catalog storage backend on Cloudflare R2, a Svelte front-end talking to the oxivault HTTP API, direct R2 video delivery for cost management, and optional per-video publication to Cloudflare Stream.
+- ADR-0001: Superseded by ADR-0003 for the storage/catalog decision; its minimal BBC Programmes profile and identity guidance are retained as semantic reference.
+- ADR-0002: Proposed, scope revised by ADR-0003. Separate development and production delivery accounts remain, but delivery is no longer Cloudflare-only: the oxivault API runs on a container host.
+- The legacy `workers/ingestion` project has been retired from this branch and is treated as historical rather than current operational code. The `workers/catalog` D1 scaffold has no consumer under ADR-0003 and is pending retirement.
 
 ## Configure GitHub development credentials
 
@@ -114,33 +115,31 @@ A deployment workflow should not expand the scope of a secret accidentally. Do n
 
 ## Architecture and design records
 
-- [ADR-0001: Use D1 for the video catalog](docs/adr/0001-use-d1-for-video-catalog.md)
+- [ADR-0003: Use oxivault on R2 for the video catalog](docs/adr/0003-use-oxivault-on-r2-for-video-catalog.md)
+- [ADR-0001: Use D1 for the video catalog](docs/adr/0001-use-d1-for-video-catalog.md) (superseded)
 - [ADR-0002: Isolate development and production delivery](docs/adr/0002-isolate-dev-and-prod-delivery.md)
 - [Design index](.agents/design/index.md)
+- [oxivault-on-R2 catalog design](.agents/design/202610041026_oxivault-r2-catalog-design.md)
 - [Plan index](.agents/plan/index.md)
-- [ADR-0001 multi-backend implementation plan](.agents/plan/202609270916_adr-0001-multi-backend-implementation.md)
 - [Review index](.agents/review/index.md)
 - [Annotation process sequence](docs/annotation-process-sequence.mermaid)
 - [DPR process diagram](docs/dpr_process_complete.mermaid)
 
 ## Implementation boundary
 
-The repository is currently split by stack layer.
+Under ADR-0003 the catalog is an oxivault vault stored on R2, served by
+the oxivault HTTP API (hosted outside Cloudflare Workers, since oxivault
+requires Python 3.14 with FastAPI/RDFLib/boto3), with a Svelte front-end.
+Video masters live in a private R2 bucket; published videos are served
+directly from a public R2 bucket on a custom domain. Stream publication
+is an explicit per-video editorial action. Four oxivault upstream
+extensions are prerequisites: authentication, CORS, presigned upload
+URLs, and (optionally) publication helpers. No deployment, provisioning,
+or live platform changes are part of this branch state.
 
-- `catalog/design` holds the design and retirement boundary for the historical Worker and the new catalog direction.
-- `catalog/implementation` is reserved for the ADR-0001 local implementation after the design commit is reviewed and committed.
-
-No deployment, provisioning, or live platform changes are part of this branch state.
-
-The provider-neutral model is design only. The current catalog scaffold and
-initial SQL migration still require `stream_uid`. ADR-0001 specifies the
-follow-up migration: logical video -> content version -> backend assets, with
-per-version playback selection. Copies of the same edition on R2 and Stream
-share a version ID; an edited cut has a different version ID. R2 is the first
-and default ingest/playback path: validate MP4 first, then add adaptive HLS.
-Stream and S3 are optional. BBC Episode/Version/Series and contributor/subject
-concepts guide the relational model; backend copies remain local extensions.
-No graph database or full production ontology is required.
+The provider-neutral D1 model is design history: `workers/catalog`, its
+migrations and the mandatory `stream_uid` scaffold belong to the
+superseded ADR-0001 architecture.
 
 ## Historical records
 

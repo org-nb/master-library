@@ -1,5 +1,11 @@
 # Epic: Master Library video catalog
 
+> **Scope revision (2026-10-04):** [ADR-0003](../adr/0003-use-oxivault-on-r2-for-video-catalog.md)
+> replaces the D1 catalog with an oxivault vault on R2, a Svelte UI over the
+> oxivault API, direct R2 delivery and optional Stream publication. The D1
+> references below are superseded; this epic will be rewritten once the
+> oxivault upstream extensions (auth, CORS, presigned upload) land.
+
 ## Goal
 
 Give librarians a working catalog of the Master Library's ~1,000 videos that

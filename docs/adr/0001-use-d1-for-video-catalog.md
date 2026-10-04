@@ -1,8 +1,9 @@
 # ADR-0001: Use D1 for the video catalog
 
-- **Status:** Proposed
+- **Status:** Superseded by [ADR-0003](0003-use-oxivault-on-r2-for-video-catalog.md) for the storage and catalog decision; the minimal BBC Programmes profile and identity guidance are retained as semantic reference
 - **Date:** 2026-09-20
 - **Updated:** 2026-09-27: R2-first ingestion and a minimal BBC ontology profile
+- **Updated:** 2026-10-04: superseded by the oxivault-on-R2 catalog decision
 - **Authors:** Daniel Kapitan, GitHub Copilot
 
 ## Context and Problem Statement
