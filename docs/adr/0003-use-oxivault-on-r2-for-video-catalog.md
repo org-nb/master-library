@@ -184,9 +184,9 @@ Librarian/audience browser
 
 Use deterministic environment-scoped names:
 
-- `master-library-vault-<env>` (vault notes; private, S3 API via
-  `S3Store`)
-- `master-library-media-private-<env>`
+- `master-library-media-private-<env>`: one private bucket holding both
+  the vault notes (under the `vault/` prefix, via `S3Store`'s prefix
+  option) and all media objects
 - `master-library-media-public-<env>`
 
 Examples:
@@ -200,7 +200,10 @@ Rules:
 
 - `private` and `public` buckets for one environment must share the same
   `<env>` suffix.
-- API config must load both names as a required pair.
+- The vault `vault/` prefix and media keys share the private bucket;
+  R2 credentials are bucket-scoped, not prefix-scoped, so the BFF must
+  never mint presigned URLs for `vault/` keys.
+- API config must load both bucket names as a required pair.
 - Clients never provide bucket names; the API chooses bucket by
   operation.
 
@@ -386,22 +389,32 @@ Notes:
 
 ## Required oxivault extensions
 
-Tracked upstream in the oxivault repository, not in this repository:
+**oxivault 0.2.1 (PyPI)** delivers the first two items. The remaining
+items are master-library application logic and live in the SvelteKit
+BFF (ADR-0004); generic parts may be offered upstream later.
 
-1. **Loopback service authentication.** A static service token for the
-   co-located SvelteKit server (ADR-0004). Browsers never reach the
-   API, so CORS is not required and multi-user auth is deferred until a
-   second API consumer exists.
-2. **Presigned URLs.** `presign_put(key, expires)` for direct browser
-   upload and `presign_get(key, expires)` for private playback/download.
-3. **Canonical key builder and validator.** Build keys only from trusted
-   metadata fields and reject path mismatches.
-4. **Place registry validation.** Enforce 1:1 mapping of `place_iri`
-   to immutable `place_slug`.
-5. **Lineage validation.** Enforce tier rules and required source links:
-   `edit|short` must declare source recording episode/version and ranges.
-6. **Pointer publish/unpublish operations.** Copy, verify, write pointer,
-   delete source, update frontmatter with idempotent retries.
+1. **Service authentication** — delivered in 0.2.1: OAuth2 bearer token
+   and session auth with `read` and `editor` roles. The BFF uses the
+   editor bearer token on the loopback hop; browsers never reach the
+   API, so CORS stays disabled.
+2. **Presigned URLs** — delivered in 0.2.1: `presign_put`/
+   `presign_get` on the stores plus `/objects/presign-put` and
+   `/objects/presign-get` endpoints.
+3. **Canonical key builder and validator** (BFF): build keys only from
+   trusted metadata fields, reject path mismatches, normalize away
+   leading slashes.
+4. **Place and event registry validation** (BFF): enforce 1:1 mappings
+   of `place_iri` to immutable `place_slug` and `event_id` to
+   `event_slug`.
+5. **Lineage validation** (BFF): enforce tier rules and required source
+   links: `edit|short` must declare source recording episode/version
+   and ranges.
+6. **Pointer publish/unpublish operations** (BFF): copy, verify, write
+   pointer, update frontmatter with idempotent retries. The 0.2.1
+   publication helper (`/publication/notes/{path}`) covers publication
+   metadata updates and same-store prefix copies but not cross-bucket
+   copies with pointer objects, so the BFF implements the state machine
+   with its own S3 client against both buckets.
 
 ## Notes on identity and integrity
 
@@ -423,8 +436,8 @@ its BBC-profile mapping table remains the semantic reference.
 
 ## Rollout
 
-1. oxivault upstream: loopback service token, presigned upload/download
-   support.
+1. Pin oxivault 0.2.1 (PyPI) with service auth and presigned
+   upload/download already available.
 2. Define and freeze the place and event identity registries
    (`place_iri` <-> `place_slug`, `event_id` <-> `event_slug`),
    verifying the chosen place term against the pinned BBC snapshot.
