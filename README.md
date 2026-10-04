@@ -3,7 +3,9 @@
 This repository is in a transition from the historical Airtable ingestion and publication worker to the catalog architecture set out in ADR-0003.
 
 Status:
-- ADR-0003: Proposed. oxivault (Vault-LD) as the catalog storage backend on Cloudflare R2, a Svelte front-end talking to the oxivault HTTP API, direct R2 video delivery for cost management, and optional per-video publication to Cloudflare Stream.
+- ADR-0005: Proposed. Google OIDC login for the SvelteKit app, default-deny against a per-user allowlist provisioned as GitHub environment secrets (`OAUTH_USER_<N>`, `email|role`); amends ADR-0004's librarian-login placeholder.
+- ADR-0004: Proposed. SvelteKit SSR front-end co-located with the oxivault API in a single container (one deployable, one browser origin); server-side agent orchestration in app code; Svelte Flow for related-video graph views. Amends ADR-0003's static-SPA and API auth/CORS assumptions.
+- ADR-0003: Proposed. oxivault (Vault-LD) as the catalog storage backend on Cloudflare R2, private-by-default media with pointer-based publication to a public R2 bucket, tiered lineage (recording/edit/short), and optional per-video publication to Cloudflare Stream.
 - ADR-0001: Superseded by ADR-0003 for the storage/catalog decision; its minimal BBC Programmes profile and identity guidance are retained as semantic reference.
 - ADR-0002: Proposed, scope revised by ADR-0003. Separate development and production delivery accounts remain, but delivery is no longer Cloudflare-only: the oxivault API runs on a container host.
 - The legacy `workers/ingestion` project has been retired from this branch and is treated as historical rather than current operational code. The `workers/catalog` D1 scaffold has no consumer under ADR-0003 and is pending retirement.
@@ -38,6 +40,8 @@ Set these in the repository's `dev` environment, not in the codebase or in a pub
 | `TF_STATE_ENCRYPTION_KEY` or a future equivalent | Environment secret | Key material for encrypted OpenTofu state or plan files | Exact name depends on the final OpenTofu encryption config; keep distinct from deploy credentials. |
 
 Do not treat this as a blanket list of all future Cloudflare secrets. The project must add each secret only when the matching feature is implemented and approved. The Worker deployment token is the first credential that can plausibly be used in a GitHub Actions deployment job; the state and bootstrap credentials remain prospective until the corresponding OpenTofu backend and locking steps are implemented.
+
+Application runtime secrets follow the same environment discipline: the Google OIDC login credentials and the per-user allowlist secrets for the SvelteKit app (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, `OAUTH_USER_COUNT`, `OAUTH_USER_1..N`) are specified in [ADR-0005](docs/adr/0005-google-oidc-login-with-github-user-allowlist.md) and are added to the `dev`/`prod` environments only when that feature slice is implemented.
 
 ### Create the environment and set values
 
@@ -115,11 +119,13 @@ A deployment workflow should not expand the scope of a secret accidentally. Do n
 
 ## Architecture and design records
 
+- [ADR-0005: Google OIDC login with a GitHub user allowlist](docs/adr/0005-google-oidc-login-with-github-user-allowlist.md)
+- [ADR-0004: Design the SvelteKit front-end for catalog and agentic workflows](docs/adr/0004-design-sveltekit-frontend-for-catalog-and-agentic-workflows.md)
 - [ADR-0003: Use oxivault on R2 for the video catalog](docs/adr/0003-use-oxivault-on-r2-for-video-catalog.md)
 - [ADR-0001: Use D1 for the video catalog](docs/adr/0001-use-d1-for-video-catalog.md) (superseded)
-- [ADR-0002: Isolate development and production delivery](docs/adr/0002-isolate-dev-and-prod-delivery.md)
+- [ADR-0002: Isolate dev and prod delivery](docs/adr/0002-isolate-dev-and-prod-delivery.md)
 - [Design index](.agents/design/index.md)
-- [oxivault-on-R2 catalog design](.agents/design/202610041026_oxivault-r2-catalog-design.md)
+- [oxivault-on-R2 catalog design](.agents/design/202610041026_oxivault-r2-catalog-design.md) (partially superseded by the ADR-0003 revision)
 - [Plan index](.agents/plan/index.md)
 - [Review index](.agents/review/index.md)
 - [Annotation process sequence](docs/annotation-process-sequence.mermaid)

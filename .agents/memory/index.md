@@ -4,6 +4,9 @@ Freeform session notes and handover scratch. One row per doc, newest first. New 
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
+| 2026-10-04 | [202610041610_review-fixes-applied.md](202610041610_review-fixes-applied.md) | Applied all 11 review findings; publish is now copy-only (private source never deleted), pointer state machine keyed on verification. |
+| 2026-10-04 | [202610041602_adr-0005-google-oidc-auth.md](202610041602_adr-0005-google-oidc-auth.md) | ADR-0005: Google OIDC login, per-user GitHub-secret allowlist, stateless sessions with deploy-time revocation. |
+| 2026-10-04 | [202610041600_adr-0004-single-container-decision.md](202610041600_adr-0004-single-container-decision.md) | Rewrote ADR-0004 for a single-container SvelteKit server + co-located oxivault API; fixed all review findings; added Svelte Flow graph views. |
 | 2026-10-04 | [202610041026_oxivault-r2-design-update.md](202610041026_oxivault-r2-design-update.md) | ADR-0003 design update: oxivault on R2, Svelte UI, direct R2 delivery, optional Stream; open decisions and next steps. |
 | 2026-09-27 | [202609271102_catalog-review-fixes.md](202609271102_catalog-review-fixes.md) | Honored current-version pointers and replaced duplicate SQL/custom splitting with Cloudflare migration test helpers. |
 | 2026-09-27 | [202609271046_adr-0001-implementation-p0-p2.md](202609271046_adr-0001-implementation-p0-p2.md) | Implemented P0, P1, P2 and baseline resolver: BBC profile mapping, D1 migrations 0002/0003, repository, and playback API. |

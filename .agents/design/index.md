@@ -4,6 +4,7 @@ Design docs; finalized ADRs live in docs/decisions/. One row per doc, newest fir
 
 | Date | File | Summary |
 | ---- | ---- | ------- |
+| 2026-10-04 | [202610041551_spa-vs-ssr-agentic-evaluation.md](202610041551_spa-vs-ssr-agentic-evaluation.md) | Decision support for ADR-0004: static SPA vs SvelteKit server, with agent-architecture analysis; recommends the server (BFF) option. |
 | 2026-10-04 | [202610041026_oxivault-r2-catalog-design.md](202610041026_oxivault-r2-catalog-design.md) | Proposed oxivault-on-R2 catalog: Svelte UI over the oxivault API, direct R2 video delivery, optional Stream publish; supersedes the ADR-0001 D1 decision. |
 | 2026-06-07 | [2026-06-07-airtable-control-plane-design.md](2026-06-07-airtable-control-plane-design.md) | Approved schema for the Airtable-based editorial control plane. |
 | 2026-06-07 | [2026-06-07-ingestion-publication-pipeline-design.md](2026-06-07-ingestion-publication-pipeline-design.md) | Approved MVP design for R2-to-Stream ingestion and publication. |

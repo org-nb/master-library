@@ -1,5 +1,13 @@
 # oxivault-on-R2 catalog design
 
+> **Partially superseded (2026-10-04):** the committed ADR-0003 revision
+> replaces this document's frontmatter schema, two-step publish flow and
+> bucket model with the tier/lineage model, canonical key convention and
+> pointer publication pattern. ADR-0004 (single-container SvelteKit
+> server) and ADR-0005 (Google OIDC auth) replace the front-end and auth
+> sections. The BBC profile mapping and cost rationale remain useful
+> context.
+
 **Project:** Master Library
 **Date:** 2026-10-04
 **Status:** Proposed (with ADR-0003)
